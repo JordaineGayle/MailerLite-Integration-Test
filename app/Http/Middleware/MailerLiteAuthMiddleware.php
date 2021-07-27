@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Repositories\MailerLite\KeyVault;
 use App\Repositories\MailerLite\SubscriberRepository;
 use Closure;
 use Illuminate\Http\Request;
@@ -17,10 +18,14 @@ class MailerLiteAuthMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        //return response('Unauthorized.', 401);
-
         $user = $request->header('user');
         $token = $request->header('token');
+
+        $token = KeyVault::RetrieveSecret($user, $token);
+
+        if($token == NULL || $token == ''){
+            return response('Unauthorized.', 401);
+        }
 
         $isAutehnticated = SubscriberRepository::authenticate($user, $token);
 

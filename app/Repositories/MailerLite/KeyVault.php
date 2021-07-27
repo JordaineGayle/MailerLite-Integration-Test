@@ -10,15 +10,11 @@ use Illuminate\Support\Facades\Schema;
 
 class KeyVault extends Model
 {
-    public $token;
-    public $user;
-
     private const TABLE_NAME = 'secrets';
     public $timestamps = false;
     public $primaryKey = 'id';
     protected $table = self::TABLE_NAME;
-    protected $appends = array('user','token');
-    protected $fillable = array('user','token');
+    protected $guarded = ['id'];
 
     public static function CreateDB() : void {
         if(Schema::hasTable(self::TABLE_NAME)){
@@ -27,8 +23,8 @@ class KeyVault extends Model
 
         Schema::create(self::TABLE_NAME, function(Blueprint $table) {
             $table->increments('id')->autoIncrement();
-            $table->string('token', 100);
             $table->string('user',100);
+            $table->string('token', 100);
         });
 
     }
@@ -39,25 +35,15 @@ class KeyVault extends Model
         }else{
             self::CreateDB();
             $value = DB::table('secrets')->where('user', $user)->value('token');
-
             if($key != NULL){
                 $value = $key;
                 $vault = new KeyVault();
-                $vault->user = $user;
                 $vault->token = $key;
+                $vault->user = $user;
                 $vault->save();
             }
             Cache::add($user, $value);
             return $value;
         }
-    }
-
-    public function getUserAttribute($value)
-    {
-        return $this->attributes['user'];
-    }
-
-    public function getTokenAttribute(){
-        return $this->attributes['token'];
     }
 }

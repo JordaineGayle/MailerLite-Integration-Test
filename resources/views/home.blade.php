@@ -4,7 +4,8 @@
 <head>
     <title>Mailer Lite - Subscription Management</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
-
+{{--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">--}}
+{{--    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>--}}
 </head>
 <body class="append-scoll">
 <container class="landing-page mobile">
@@ -14,14 +15,14 @@
         <p class="h3">Why choose us ?</p>
         <p class="text">The standard chunk of Lorem Ipsum used since the 1500s is reproduced below for those interested. Sections 1.10.32 and 1.10.33 from "de Finibus Bonorum et Malorum" by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham.</p>
         <section class="sign-up-section">
-            <input type="password" placeholder="Enter you mailer lite API-KEY"/>
-            <button type="submit" class="">START MANAGING SUBSCRIBERS</button>
+            <input type="password" placeholder="Enter you mailer lite API-KEY" id="key"/>
+            <button type="button" onclick="authenticate()" class="">START MANAGING SUBSCRIBERS</button>
         </section>
     </section>
     <section class="image-review-section hidden">
     </section>
-
 </container>
+
 </body>
 
 </html>
@@ -156,9 +157,43 @@
 </style>
 
 <script type="text/javascript">
-    gsap.timeline()
-        .from('.landing-page',{opacity: 0, duration: 0.8, scale: 0,ease: "back"})
-        .from('.general-info-section p', {opacity: 0, yPercent:-100, stagger: 0.2, duration: 0.8, delay: 1, ease: "back"})
-        .from('.sign-up-section', {opacity: 0, y: -30, duration:1,delay: 0.5, ease: "back"})
-        .from('.image-review-section', {opacity: 0, y: 300, duration:1,delay: 0.5, ease: "back"});
+
+    const isAuthenticated = localStorage.getItem('authenticated');
+
+    if(isAuthenticated){
+        location.href = "/dash";
+    }else{
+        gsap.timeline()
+            .from('.landing-page',{opacity: 0, duration: 0.8, scale: 0,ease: "back"})
+            .from('.general-info-section p', {opacity: 0, yPercent:-100, stagger: 0.2, duration: 0.8, delay: 1, ease: "back"})
+            .from('.sign-up-section', {opacity: 0, y: -30, duration:1,delay: 0.5, ease: "back"})
+            .from('.image-review-section', {opacity: 0, y: 300, duration:1,delay: 0.5, ease: "back"});
+    }
+
+    async function authenticate(){
+        const user = +new Date();
+
+        let apikey = document.getElementById('key').value;
+        if(!apikey){
+            alert('Please enter a valid apu key.');
+            return;
+        }
+        let request = {
+            user: user.toString(),
+            token: apikey
+        }
+
+        let response = await fetch('api/user/auth', {
+            method: 'POST',
+            body: JSON.stringify(request)
+        });
+
+        let data = await response.text();
+
+        if(data){
+            localStorage.setItem('user',data);
+            localStorage.setItem('authenticated',true);
+            location.href = "/dash";
+        }
+    }
 </script>

@@ -24,12 +24,6 @@ class SubscriberRepository implements ISubscriberRepository
 
     public static function authenticate(string $userId, string $apiKey = NULL): bool
     {
-        $apiKey = KeyVault::RetrieveSecret($userId, $apiKey);
-
-        if($apiKey == NULL || $apiKey == ''){
-            return false;
-        }
-
         $response = Http::withoutVerifying()
             ->withHeaders(['X-MailerLite-ApiKey' => $apiKey])
             ->get('https://api.mailerlite.com/api/v2/stats');
