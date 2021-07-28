@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en" class="append-scoll">
 <head>
     <title>Mailer Lite - Subscription Management</title>

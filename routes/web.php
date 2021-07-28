@@ -9,3 +9,7 @@ Route::get('/', function () {
 Route::get('dash', function () {
     return view('dashboard');
 });
+
+Route::get('new-subscriber', function () {
+    return view('addsubscriber');
+});

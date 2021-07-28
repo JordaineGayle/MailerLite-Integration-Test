@@ -17,5 +17,5 @@ interface ISubscriberRepository
     public function create(SubscriberRequestModel $rq) : SubscriberResponse;
     public function update(SubscriberRequestModel $rq) : SubscriberResponse;
     public function handleResponse(Response $response) : SubscriberResponse;
-    public function paginator(Request $request, Collection $collection, int $itemsPerPage = 10) : LengthAwarePaginator;
+    public function paginator(Request $request, Collection $collection, int $itemsPerPage = 10);
 }

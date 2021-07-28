@@ -14,9 +14,11 @@ class SubscribersController extends Controller
 
     private $request;
     private $mlite;
+    private $query;
     private $orderBy;
     private $itemsPerPage;
     private $sortOrder;
+    private $columnOrder = ['0'=>'email','1'=>'name','2'=>'country','3'=>'date_subscribed','4'=>'time_subscribed','5'=>'id'];
 
     /**
      * SubscribersController constructor.
@@ -29,15 +31,26 @@ class SubscribersController extends Controller
         if($token != NULL){
             $this->mlite = new SubscriberRepository($token);
             $this->request = $request;
-            $this->itemsPerPage = $request->input('ipp', 10);
-            $this->sortOrder = $request->input('sortOrder', 'asc');
-            $this->orderBy = $request->input('orderBy');
+            try{
+                $this->itemsPerPage = $request->input('length', 10);
+                $this->sortOrder = $request->input('order')[0]['dir'] ?? 'asc';
+                $this->orderBy = $this->columnOrder[$request->input('order')[0]['column']];
+            }catch (\Exception $e){}
+
+            try{
+                $this->query = $request->input('search')['value'];
+            }catch (\Exception $e){}
         }
     }
 
     public function index(){
 
-        $items = $this->mlite->getAll()->collection;
+        if($this->query == NULL){
+            $items = $this->mlite->getAll()->collection;
+        }else{
+            $items = $this->mlite->query($this->query)->collection;
+        }
+
 
         if($this->orderBy != NULL){
 
@@ -85,7 +98,8 @@ class SubscribersController extends Controller
     public function unsubscribe(){
         $item = new Subscriber($this->request->post());
         $res = $this->mlite->delete($item);
-        if($res->subscriber == null){
+        if($res->subscriber == null)
+        {
             return response($res->responseMessage,$res->responseCode);
         }
         return $res->subscriber;

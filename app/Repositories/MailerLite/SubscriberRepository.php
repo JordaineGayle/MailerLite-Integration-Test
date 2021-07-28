@@ -105,20 +105,32 @@ class SubscriberRepository implements ISubscriberRepository
 
         try{
             foreach ($result as $res){
-                $sub[] = new Subscriber($res);
+                if($res['type'] == 'active'){
+                    $sub[] = new Subscriber($res);
+                }
             }
         }catch (\Exception $e){}
 
         return new SubscriberResponse($subscriber,new Collection($sub));
     }
 
-    public function paginator(Request $request, Collection $collection, int $itemsPerPage = 10): LengthAwarePaginator
+    public function paginator(Request $request, Collection $collection, int $itemsPerPage = 10)
     {
+        $currentPage = $request->input('start',1);
+
+        if($currentPage == 0){
+            $currentPage = 1;
+        }
+        else{
+            $currentPage = ($currentPage / $itemsPerPage)+1;
+        }
+
         $items = $collection->toArray();
-        $currentPage = $request->input('page',1);
         $offset = ($currentPage * $itemsPerPage) - $itemsPerPage;
-        $pagination = new LengthAwarePaginator(array_slice($items, $offset, $itemsPerPage, true),
+        $pagination = new LengthAwarePaginator(array_slice($items, $offset, $itemsPerPage),
             count($items), $itemsPerPage, $currentPage, ['path' => $request->url(), 'query' => $request->query()]);
-        return $pagination;
+        $totalCol = collect(['recordsTotal'=>$currentPage * $itemsPerPage, 'recordsFiltered' => count($items)]);
+
+        return $totalCol->merge($pagination);
     }
 }
